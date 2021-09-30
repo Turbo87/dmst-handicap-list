@@ -1,0 +1,34 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 300;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Domine', serif;
+}
+
+h1 {
+    padding: 4px 12px;
+}
+
+table {
+    border-spacing: 0;
+    line-height: 1.5em;
+}
+
+td {
+    padding: 4px 12px;
+}
+
+tr:nth-child(even) {
+    background: #f0f0f0
+}
+
+td:nth-child(2) {
+    text-align: right;
+}
+
+.sep {
+    opacity: 0.1;
+    margin: 0 4px;
+}
