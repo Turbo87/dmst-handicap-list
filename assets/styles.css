@@ -1,3 +1,7 @@
+@page {
+    size: A4 portrait;
+}
+
 body {
     font-family: 'Roboto', sans-serif;
     font-weight: 300;
@@ -7,8 +11,37 @@ h1, h2, h3, h4, h5, h6 {
     font-family: 'Domine', serif;
 }
 
-h1 {
+.header,
+.header-space {
+    height: 90px;
+}
+
+.header {
+    background-color: white;
+    position: fixed;
+    top: 0;
+    margin: 0;
     padding: 4px 12px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.logo {
+    width: auto;
+    height: 50px;
+    margin-right: 12px;
+}
+
+h2 {
+    padding: 4px 12px;
+    page-break-before: always;
+}
+
+@media print {
+    h2:nth-child(1) {
+        margin-top: 0;
+    }
 }
 
 table {
@@ -16,16 +49,25 @@ table {
     line-height: 1.5em;
 }
 
-td {
-    padding: 4px 12px;
+tr {
+    page-break-inside: avoid;
+    page-break-after: auto
 }
 
 tr:nth-child(even) {
     background: #f0f0f0
 }
 
+td {
+    padding: 4px 12px;
+}
+
 td:nth-child(2) {
     text-align: right;
+}
+
+.glider-type {
+    white-space: nowrap;
 }
 
 .sep {
