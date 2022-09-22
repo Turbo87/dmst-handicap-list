@@ -31,7 +31,7 @@ fn main() -> anyhow::Result<()> {
         <html lang="de">
         <head>
             <meta charset="UTF-8">
-            <title>DMSt-Wettbewerbsordnung</title>
+            <title>DMSt Indexliste 2023</title>
             <link href="https://fonts.googleapis.com/css?family=Domine&display=swap" rel="stylesheet">
             <link href="https://fonts.googleapis.com/css?family=Roboto:300,400&display=swap" rel="stylesheet">
             <link href="styles.css" rel="stylesheet">
@@ -39,7 +39,7 @@ fn main() -> anyhow::Result<()> {
         <body>
         <h1 class="header">
             <img src="logo.jpg" class="logo">
-            DMSt Indexliste 2022
+            DMSt Indexliste 2023
         </h1>
         <table>
           <thead><tr><td>
