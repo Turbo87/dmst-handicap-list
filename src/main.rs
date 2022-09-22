@@ -17,7 +17,7 @@ fn main() -> anyhow::Result<()> {
     for result in rdr.records() {
         let record = result?;
         let name = record.get(2).unwrap().to_string();
-        let handicap = record.get(16).unwrap().parse::<u8>()?;
+        let handicap = record.get(17).unwrap().parse::<u8>()?;
         let class = record.get(4).unwrap().to_string();
 
         let class_handicaps = handicaps.entry(class).or_insert_with(|| HashMap::new());
