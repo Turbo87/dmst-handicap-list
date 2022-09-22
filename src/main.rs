@@ -1,3 +1,4 @@
+use anyhow::Context;
 use headless_chrome::protocol::page::PrintToPdfOptions;
 use headless_chrome::Browser;
 use indoc::indoc;
@@ -8,21 +9,37 @@ use std::io::Write;
 use std::path::PathBuf;
 use url::Url;
 
+#[derive(Ord, PartialOrd, Eq, PartialEq, Debug, Clone)]
+struct PlaneType {
+    name: String,
+    highlight: bool,
+}
+
 fn main() -> anyhow::Result<()> {
     let file = File::open("gliderlist.csv")?;
 
-    let mut handicaps: HashMap<String, HashMap<u8, Vec<String>>> = HashMap::new();
+    let mut handicaps: HashMap<String, HashMap<u8, Vec<PlaneType>>> = HashMap::new();
 
     let mut rdr = csv::Reader::from_reader(file);
     for result in rdr.records() {
         let record = result?;
+        let id = record
+            .get(0)
+            .unwrap()
+            .parse::<u32>()
+            .context("Failed to parse id")?;
         let name = record.get(2).unwrap().to_string();
+        let old_handicap = record.get(16).unwrap().parse::<u8>()?;
         let handicap = record.get(17).unwrap().parse::<u8>()?;
         let class = record.get(4).unwrap().to_string();
 
+        let highlight = id > 593 || handicap != old_handicap;
+
+        let plane_type = PlaneType { name, highlight };
+
         let class_handicaps = handicaps.entry(class).or_insert_with(|| HashMap::new());
         let glider_list = class_handicaps.entry(handicap).or_insert_with(|| vec![]);
-        glider_list.push(name);
+        glider_list.push(plane_type);
     }
 
     let mut output = String::new();
@@ -70,11 +87,26 @@ fn main() -> anyhow::Result<()> {
         for key in keys {
             let mut glider_list = handicaps.get(key).unwrap().clone();
             glider_list.sort();
-            let glider_list =
-                glider_list.join(r#"<span class="sep">|</span></span> <span class="glider-type">"#);
+
+            let glider_list = glider_list
+                .into_iter()
+                .map(|plane_type| {
+                    let highlight = if plane_type.highlight {
+                        " highlight"
+                    } else {
+                        ""
+                    };
+
+                    format!(
+                        r#"<span class="glider-type{}">{}</span>"#,
+                        highlight, plane_type.name
+                    )
+                })
+                .collect::<Vec<_>>()
+                .join(r#"<span class="sep">|</span></span> <span class="glider-type">"#);
 
             output += &format!(
-                "  <tr>\n    <td><span class=\"glider-type\">{}</span></td>\n    <td>{}</td>\n  </tr>\n",
+                "  <tr>\n    <td>{}</td>\n    <td>{}</td>\n  </tr>\n",
                 glider_list, key,
             );
         }

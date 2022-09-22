@@ -70,6 +70,10 @@ td:nth-child(2) {
     white-space: nowrap;
 }
 
+.glider-type.highlight {
+    font-weight: bold;
+}
+
 .sep {
     opacity: 0.1;
     margin: 0 4px;
