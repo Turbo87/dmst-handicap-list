@@ -1,5 +1,5 @@
 use anyhow::Context;
-use headless_chrome::protocol::page::PrintToPdfOptions;
+use headless_chrome::types::PrintToPdfOptions;
 use headless_chrome::Browser;
 use indoc::indoc;
 use std::collections::HashMap;
