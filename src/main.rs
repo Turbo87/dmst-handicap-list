@@ -76,7 +76,10 @@ impl Generator {
             self.assets.join("styles.css"),
             self.output.join("styles.css"),
         )?;
-        fs::copy(self.assets.join("logo.jpg"), self.output.join("logo.jpg"))?;
+        fs::copy(
+            self.assets.join("dmst-logo.svg"),
+            self.output.join("dmst-logo.svg"),
+        )?;
 
         let file_path = fs::canonicalize(file_path)?;
         let pdf_path = self.output.join("handicaps.pdf");
