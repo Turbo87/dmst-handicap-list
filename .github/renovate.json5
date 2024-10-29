@@ -1,0 +1,14 @@
+{
+  extends: [
+    "config:best-practices",
+    ":pinAllExceptPeerDependencies",
+    ":maintainLockFilesWeekly",
+    ":prConcurrentLimitNone",
+    ":prHourlyLimitNone",
+    ":semanticCommitsDisabled",
+    ":automergeLinters",
+    ":automergeTesters",
+    "customManagers:githubActionsVersions",
+    "github>Turbo87/renovate-config//rust/updateToolchain",
+  ],
+}
