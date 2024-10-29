@@ -1,5 +1,5 @@
 use anyhow::Context;
-use headless_chrome::protocol::page::PrintToPdfOptions;
+use headless_chrome::types::PrintToPdfOptions;
 use headless_chrome::Browser;
 use indoc::indoc;
 use std::collections::HashMap;
@@ -168,30 +168,18 @@ fn main() -> anyhow::Result<()> {
 fn to_pdf(input: &Path, output: &Path) -> anyhow::Result<()> {
     let file_url = Url::from_file_path(input).unwrap().to_string();
 
-    let browser = Browser::default().unwrap();
+    let browser = Browser::default()?;
 
-    let tab = browser.wait_for_initial_tab().unwrap();
-    tab.navigate_to(&file_url).unwrap();
-    tab.wait_until_navigated().unwrap();
+    let tab = browser.new_tab()?;
+    tab.navigate_to(&file_url)?;
+    tab.wait_until_navigated()?;
 
     let options = PrintToPdfOptions {
-        landscape: None,
-        display_header_footer: None,
         print_background: Some(true),
-        scale: None,
-        paper_width: None,
-        paper_height: None,
-        margin_top: None,
-        margin_bottom: None,
-        margin_left: None,
-        margin_right: None,
-        page_ranges: None,
-        ignore_invalid_page_ranges: None,
-        header_template: None,
-        footer_template: None,
         prefer_css_page_size: Some(true),
+        ..Default::default()
     };
-    let pdf_bytes = tab.print_to_pdf(Some(options)).unwrap();
+    let pdf_bytes = tab.print_to_pdf(Some(options))?;
     let mut pdf_file = File::create(output)?;
     pdf_file.write_all(pdf_bytes.as_slice())?;
 
