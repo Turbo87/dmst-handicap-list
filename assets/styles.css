@@ -51,27 +51,27 @@ table {
 
 tr {
     page-break-inside: avoid;
-    page-break-after: auto
-}
+    page-break-after: auto;
 
-tr:nth-child(even) {
-    background: #f0f0f0
+    &:nth-child(even) {
+        background: #f0f0f0
+    }
 }
 
 td {
     padding: 4px 12px;
-}
 
-td:nth-child(2) {
-    text-align: right;
+    &:nth-child(2) {
+        text-align: right;
+    }
 }
 
 .glider-type {
     white-space: nowrap;
-}
 
-.glider-type.highlight {
-    font-weight: bold;
+    &.highlight {
+        font-weight: bold;
+    }
 }
 
 .sep {
