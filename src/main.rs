@@ -175,21 +175,9 @@ fn to_pdf(input: &Path, output: &Path) -> anyhow::Result<()> {
     tab.wait_until_navigated().unwrap();
 
     let options = PrintToPdfOptions {
-        landscape: None,
-        display_header_footer: None,
         print_background: Some(true),
-        scale: None,
-        paper_width: None,
-        paper_height: None,
-        margin_top: None,
-        margin_bottom: None,
-        margin_left: None,
-        margin_right: None,
-        page_ranges: None,
-        ignore_invalid_page_ranges: None,
-        header_template: None,
-        footer_template: None,
         prefer_css_page_size: Some(true),
+        ..Default::default()
     };
     let pdf_bytes = tab.print_to_pdf(Some(options)).unwrap();
     let mut pdf_file = File::create(output)?;
