@@ -201,6 +201,7 @@ fn to_pdf(input: &Path, output: &Path) -> anyhow::Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use insta::assert_snapshot;
 
     #[test]
     fn test_main() {
@@ -213,5 +214,8 @@ mod tests {
         };
 
         generator.generate().unwrap();
+
+        let html = fs::read_to_string(tempdir.path().join("handicaps.html")).unwrap();
+        assert_snapshot!(html);
     }
 }
