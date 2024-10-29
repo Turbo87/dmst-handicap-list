@@ -11,7 +11,7 @@ csv = "=1.1.6"
 headless_chrome = { version = "=0.9.0", default-features = false }
 indoc = "=1.0.3"
 tempfile = "=3.13.0"
-url = "=2.2.2"
+url = "=2.5.2"
 
 [dev-dependencies]
 insta = "=1.41.0"
