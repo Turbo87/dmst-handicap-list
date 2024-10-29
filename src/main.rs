@@ -170,7 +170,7 @@ fn to_pdf(input: &Path, output: &Path) -> anyhow::Result<()> {
 
     let browser = Browser::default().unwrap();
 
-    let tab = browser.wait_for_initial_tab().unwrap();
+    let tab = browser.new_tab().unwrap();
     tab.navigate_to(&file_url).unwrap();
     tab.wait_until_navigated().unwrap();
 
