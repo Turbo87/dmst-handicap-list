@@ -1,6 +1,7 @@
 ---
 source: src/main.rs
 expression: html
+snapshot_kind: text
 ---
 <!DOCTYPE html>
 <html lang="de">
