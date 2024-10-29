@@ -15,35 +15,42 @@ struct PlaneType {
     highlight: bool,
 }
 
-fn main() -> anyhow::Result<()> {
-    let file = File::open("gliderlist.csv")?;
+struct Generator {
+    input: PathBuf,
+    assets: PathBuf,
+    output: PathBuf,
+}
 
-    let mut handicaps: HashMap<String, HashMap<u8, Vec<PlaneType>>> = HashMap::new();
+impl Generator {
+    fn generate(&self) -> anyhow::Result<()> {
+        let file = File::open(&self.input)?;
 
-    let mut rdr = csv::Reader::from_reader(file);
-    for result in rdr.records() {
-        let record = result?;
-        let id = record
-            .get(0)
-            .unwrap()
-            .parse::<u32>()
-            .context("Failed to parse id")?;
-        let name = record.get(2).unwrap().to_string();
-        let old_handicap = record.get(16).unwrap().parse::<u8>()?;
-        let handicap = record.get(17).unwrap().parse::<u8>()?;
-        let class = record.get(4).unwrap().to_string();
+        let mut handicaps: HashMap<String, HashMap<u8, Vec<PlaneType>>> = HashMap::new();
 
-        let highlight = id > 593 || handicap != old_handicap;
+        let mut rdr = csv::Reader::from_reader(file);
+        for result in rdr.records() {
+            let record = result?;
+            let id = record
+                .get(0)
+                .unwrap()
+                .parse::<u32>()
+                .context("Failed to parse id")?;
+            let name = record.get(2).unwrap().to_string();
+            let old_handicap = record.get(16).unwrap().parse::<u8>()?;
+            let handicap = record.get(17).unwrap().parse::<u8>()?;
+            let class = record.get(4).unwrap().to_string();
 
-        let plane_type = PlaneType { name, highlight };
+            let highlight = id > 593 || handicap != old_handicap;
 
-        let class_handicaps = handicaps.entry(class).or_default();
-        let glider_list = class_handicaps.entry(handicap).or_default();
-        glider_list.push(plane_type);
-    }
+            let plane_type = PlaneType { name, highlight };
 
-    let mut output = String::new();
-    output += indoc! {r#"
+            let class_handicaps = handicaps.entry(class).or_default();
+            let glider_list = class_handicaps.entry(handicap).or_default();
+            glider_list.push(plane_type);
+        }
+
+        let mut output = String::new();
+        output += indoc! {r#"
         <!DOCTYPE html>
         <html lang="de">
         <head>
@@ -66,55 +73,55 @@ fn main() -> anyhow::Result<()> {
             <div class="content">
     "#};
 
-    let categories = vec![
-        ("Open", "Offene Klasse"),
-        ("18", "18m Klasse"),
-        ("15", "15m Klasse"),
-        ("Standard", "Standardklasse"),
-        ("Club", "Clubklasse"),
-        ("Double", "Doppelsitzer"),
-    ];
+        let categories = vec![
+            ("Open", "Offene Klasse"),
+            ("18", "18m Klasse"),
+            ("15", "15m Klasse"),
+            ("Standard", "Standardklasse"),
+            ("Club", "Clubklasse"),
+            ("Double", "Doppelsitzer"),
+        ];
 
-    for (key, label) in categories {
-        output += &format!("<h2>{}</h2>\n", label);
-        output += "<table>\n";
+        for (key, label) in categories {
+            output += &format!("<h2>{}</h2>\n", label);
+            output += "<table>\n";
 
-        let handicaps = handicaps.get(key).unwrap();
+            let handicaps = handicaps.get(key).unwrap();
 
-        let mut keys: Vec<_> = handicaps.keys().collect();
-        keys.sort_by(|a, b| b.cmp(a));
+            let mut keys: Vec<_> = handicaps.keys().collect();
+            keys.sort_by(|a, b| b.cmp(a));
 
-        for key in keys {
-            let mut glider_list = handicaps.get(key).unwrap().clone();
-            glider_list.sort();
+            for key in keys {
+                let mut glider_list = handicaps.get(key).unwrap().clone();
+                glider_list.sort();
 
-            let glider_list = glider_list
-                .into_iter()
-                .map(|plane_type| {
-                    let highlight = if plane_type.highlight {
-                        " highlight"
-                    } else {
-                        ""
-                    };
+                let glider_list = glider_list
+                    .into_iter()
+                    .map(|plane_type| {
+                        let highlight = if plane_type.highlight {
+                            " highlight"
+                        } else {
+                            ""
+                        };
 
-                    format!(
-                        r#"<span class="glider-type{}">{}</span>"#,
-                        highlight, plane_type.name
-                    )
-                })
-                .collect::<Vec<_>>()
-                .join(r#"<span class="sep">|</span></span> <span class="glider-type">"#);
+                        format!(
+                            r#"<span class="glider-type{}">{}</span>"#,
+                            highlight, plane_type.name
+                        )
+                    })
+                    .collect::<Vec<_>>()
+                    .join(r#"<span class="sep">|</span></span> <span class="glider-type">"#);
 
-            output += &format!(
-                "  <tr>\n    <td>{}</td>\n    <td>{}</td>\n  </tr>\n",
-                glider_list, key,
-            );
+                output += &format!(
+                    "  <tr>\n    <td>{}</td>\n    <td>{}</td>\n  </tr>\n",
+                    glider_list, key,
+                );
+            }
+
+            output += "</table>\n";
         }
 
-        output += "</table>\n";
-    }
-
-    output += indoc! {r#"
+        output += indoc! {r#"
             </div>
           </td></tr></tbody>
           <tfoot><tr><td>
@@ -125,28 +132,37 @@ fn main() -> anyhow::Result<()> {
         </html>
     "#};
 
-    let output_path = PathBuf::from("output");
-    fs::create_dir_all(&output_path)?;
-    let file_path = output_path.join("handicaps.html");
-    let mut file = File::create(&file_path)?;
-    file.write_all(output.as_bytes())?;
+        fs::create_dir_all(&self.output)?;
+        let file_path = self.output.join("handicaps.html");
+        let mut file = File::create(&file_path)?;
+        file.write_all(output.as_bytes())?;
 
-    let assets_path = PathBuf::from("assets");
-    fs::copy(
-        assets_path.join("normalize.css"),
-        output_path.join("normalize.css"),
-    )?;
-    fs::copy(
-        assets_path.join("styles.css"),
-        output_path.join("styles.css"),
-    )?;
-    fs::copy(assets_path.join("logo.jpg"), output_path.join("logo.jpg"))?;
+        fs::copy(
+            self.assets.join("normalize.css"),
+            self.output.join("normalize.css"),
+        )?;
+        fs::copy(
+            self.assets.join("styles.css"),
+            self.output.join("styles.css"),
+        )?;
+        fs::copy(self.assets.join("logo.jpg"), self.output.join("logo.jpg"))?;
 
-    let file_path = fs::canonicalize(file_path)?;
-    let pdf_path = output_path.join("handicaps.pdf");
-    to_pdf(&file_path, &pdf_path)?;
+        let file_path = fs::canonicalize(file_path)?;
+        let pdf_path = self.output.join("handicaps.pdf");
+        to_pdf(&file_path, &pdf_path)?;
 
-    Ok(())
+        Ok(())
+    }
+}
+
+fn main() -> anyhow::Result<()> {
+    let generator = Generator {
+        input: "gliderlist.csv".into(),
+        assets: "assets".into(),
+        output: "output".into(),
+    };
+
+    generator.generate()
 }
 
 fn to_pdf(input: &Path, output: &Path) -> anyhow::Result<()> {
