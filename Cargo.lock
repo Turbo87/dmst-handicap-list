@@ -241,8 +241,9 @@ dependencies = [
  "anyhow",
  "csv",
  "headless_chrome",
- "indoc",
  "insta",
+ "minijinja",
+ "serde",
  "tempfile",
  "url",
 ]
@@ -387,12 +388,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "indoc"
-version = "2.0.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b248f5224d1d606005e02c97f5aa4e88eeb230488bcc03bc9ca4d7991399f2b5"
-
-[[package]]
 name = "insta"
 version = "1.41.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -445,6 +440,15 @@ name = "memchr"
 version = "2.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "78ca9ab1a0babb1e7d5695e3530886289c18cf2f87ec19a575a0abdce112e3a3"
+
+[[package]]
+name = "minijinja"
+version = "2.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c9ca8daf4b0b4029777f1bc6e1aedd1aec7b74c276a43bc6f620a8e1a1c0a90e"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "miniz_oxide"

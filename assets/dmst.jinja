@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>DAeC Indexliste: DMSt 2023</title>
+    <link href="https://fonts.googleapis.com/css?family=Domine&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400&display=swap" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body>
+<h1 class="header">
+    <img src="logo.jpg" class="logo">
+    DAeC Indexliste: DMSt 2023
+</h1>
+<table>
+  <thead>
+  <tr>
+    <td>
+      <div class="header-space">&nbsp;</div>
+    </td>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td>
+    <div class="content">
+    {%- for key, label in categories %}
+        <h2>{{ label }}</h2>
+        <table>
+        {%- for handicap, gliders in handicaps[key] | dictsort(reverse=true) %}
+            <tr>
+                <td>
+                {%- for glider in gliders | sort(attribute="name") %}
+                    <span class="glider-type{% if glider.highlight %} highlight{% endif %}">{{ glider.name }}{% if not loop.last %} <span class="sep">|</span>{% endif %}</span>
+                {%- endfor %}
+                </td>
+                <td>{{ handicap }}</td>
+            </tr>
+        {%- endfor %}
+        </table>
+    {% endfor %}
+    </div>
+    </td>
+  </tr>
+  </tbody>
+  <tfoot>
+  <tr>
+    <td>
+      <div class="footer-space">&nbsp;</div>
+    </td>
+  </tr>
+  </tfoot>
+</table>
+</body>
+</html>

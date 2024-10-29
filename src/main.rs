@@ -1,7 +1,7 @@
 use anyhow::Context;
 use headless_chrome::types::PrintToPdfOptions;
 use headless_chrome::Browser;
-use indoc::indoc;
+use minijinja::{context, Environment};
 use std::collections::HashMap;
 use std::fs;
 use std::fs::File;
@@ -9,7 +9,7 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use url::Url;
 
-#[derive(Ord, PartialOrd, Eq, PartialEq, Debug, Clone)]
+#[derive(Ord, PartialOrd, Eq, PartialEq, Debug, Clone, serde::Serialize)]
 struct PlaneType {
     name: String,
     highlight: bool,
@@ -49,30 +49,6 @@ impl Generator {
             glider_list.push(plane_type);
         }
 
-        let mut output = String::new();
-        output += indoc! {r#"
-            <!DOCTYPE html>
-            <html lang="de">
-            <head>
-                <meta charset="UTF-8">
-                <title>DAeC Indexliste: DMSt 2023</title>
-                <link href="https://fonts.googleapis.com/css?family=Domine&display=swap" rel="stylesheet">
-                <link href="https://fonts.googleapis.com/css?family=Roboto:300,400&display=swap" rel="stylesheet">
-                <link href="styles.css" rel="stylesheet">
-            </head>
-            <body>
-            <h1 class="header">
-                <img src="logo.jpg" class="logo">
-                DAeC Indexliste: DMSt 2023
-            </h1>
-            <table>
-              <thead><tr><td>
-                <div class="header-space">&nbsp;</div>
-              </td></tr></thead>
-              <tbody><tr><td>
-                <div class="content">
-        "#};
-
         let categories = vec![
             ("Open", "Offene Klasse"),
             ("18", "18m Klasse"),
@@ -82,55 +58,10 @@ impl Generator {
             ("Double", "Doppelsitzer"),
         ];
 
-        for (key, label) in categories {
-            output += &format!("<h2>{}</h2>\n", label);
-            output += "<table>\n";
-
-            let handicaps = handicaps.get(key).unwrap();
-
-            let mut keys: Vec<_> = handicaps.keys().collect();
-            keys.sort_by(|a, b| b.cmp(a));
-
-            for key in keys {
-                let mut glider_list = handicaps.get(key).unwrap().clone();
-                glider_list.sort();
-
-                let glider_list = glider_list
-                    .into_iter()
-                    .map(|plane_type| {
-                        let highlight = if plane_type.highlight {
-                            " highlight"
-                        } else {
-                            ""
-                        };
-
-                        format!(
-                            r#"<span class="glider-type{}">{}</span>"#,
-                            highlight, plane_type.name
-                        )
-                    })
-                    .collect::<Vec<_>>()
-                    .join(r#"<span class="sep">|</span></span> <span class="glider-type">"#);
-
-                output += &format!(
-                    "  <tr>\n    <td>{}</td>\n    <td>{}</td>\n  </tr>\n",
-                    glider_list, key,
-                );
-            }
-
-            output += "</table>\n";
-        }
-
-        output += indoc! {r#"
-                </div>
-              </td></tr></tbody>
-              <tfoot><tr><td>
-                <div class="footer-space">&nbsp;</div>
-              </td></tr></tfoot>
-            </table>
-            </body>
-            </html>
-        "#};
+        let env = Environment::new();
+        let template = fs::read_to_string(self.assets.join("dmst.jinja"))?;
+        let template = env.template_from_str(&template)?;
+        let output = template.render(context! { categories, handicaps })?;
 
         fs::create_dir_all(&self.output)?;
         let file_path = self.output.join("handicaps.html");
