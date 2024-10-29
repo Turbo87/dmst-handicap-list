@@ -166,7 +166,9 @@ fn main() -> anyhow::Result<()> {
 }
 
 fn to_pdf(input: &Path, output: &Path) -> anyhow::Result<()> {
-    let file_url = Url::from_file_path(input).unwrap().to_string();
+    let file_url = Url::from_file_path(input)
+        .map_err(|_| anyhow::anyhow!("Failed to convert file path to URL"))?
+        .to_string();
 
     let browser = Browser::default()?;
 
