@@ -37,8 +37,8 @@ fn main() -> anyhow::Result<()> {
 
         let plane_type = PlaneType { name, highlight };
 
-        let class_handicaps = handicaps.entry(class).or_insert_with(|| HashMap::new());
-        let glider_list = class_handicaps.entry(handicap).or_insert_with(|| vec![]);
+        let class_handicaps = handicaps.entry(class).or_default();
+        let glider_list = class_handicaps.entry(handicap).or_default();
         glider_list.push(plane_type);
     }
 
