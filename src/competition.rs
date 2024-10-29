@@ -45,16 +45,22 @@ pub fn generate_competition(opts: &Options) -> anyhow::Result<()> {
         .deserialize()
         .collect::<Result<Vec<Record>, _>>()?;
 
+    const REFERENCE_15M: f32 = 114.;
+    const CUTOFF_15M: f32 = 105.;
+
     let m15 = handicaps
         .iter()
-        .filter(|r| r.is_15m && r.handicap > 105.)
-        .map(|r| r.with_handicap(r.handicap / 114.))
+        .filter(|r| r.is_15m && r.handicap > CUTOFF_15M)
+        .map(|r| r.with_handicap(r.handicap / REFERENCE_15M))
         .collect::<Vec<_>>();
+
+    const REFERENCE_STD: f32 = 110.;
+    const CUTOFF_STD: f32 = 101.;
 
     let standard = handicaps
         .iter()
-        .filter(|r| r.is_standard && r.handicap > 101.)
-        .map(|r| r.with_handicap(r.handicap / 110.))
+        .filter(|r| r.is_standard && r.handicap > CUTOFF_STD)
+        .map(|r| r.with_handicap(r.handicap / REFERENCE_STD))
         .collect::<Vec<_>>();
 
     let mut env = Environment::new();
