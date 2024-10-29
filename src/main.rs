@@ -128,7 +128,6 @@ fn main() -> anyhow::Result<()> {
     let output_path = PathBuf::from("output");
     fs::create_dir_all(&output_path)?;
     let file_path = output_path.join("handicaps.html");
-    let file_path = fs::canonicalize(file_path)?;
     let mut file = File::create(&file_path)?;
     file.write_all(output.as_bytes())?;
 
@@ -146,6 +145,7 @@ fn main() -> anyhow::Result<()> {
     let browser = Browser::default().unwrap();
     let tab = browser.wait_for_initial_tab().unwrap();
 
+    let file_path = fs::canonicalize(file_path)?;
     let file_url = Url::from_file_path(&file_path).unwrap().to_string();
     tab.navigate_to(&file_url).unwrap();
     tab.wait_until_navigated().unwrap();
