@@ -168,18 +168,18 @@ fn main() -> anyhow::Result<()> {
 fn to_pdf(input: &Path, output: &Path) -> anyhow::Result<()> {
     let file_url = Url::from_file_path(input).unwrap().to_string();
 
-    let browser = Browser::default().unwrap();
+    let browser = Browser::default()?;
 
-    let tab = browser.new_tab().unwrap();
-    tab.navigate_to(&file_url).unwrap();
-    tab.wait_until_navigated().unwrap();
+    let tab = browser.new_tab()?;
+    tab.navigate_to(&file_url)?;
+    tab.wait_until_navigated()?;
 
     let options = PrintToPdfOptions {
         print_background: Some(true),
         prefer_css_page_size: Some(true),
         ..Default::default()
     };
-    let pdf_bytes = tab.print_to_pdf(Some(options)).unwrap();
+    let pdf_bytes = tab.print_to_pdf(Some(options))?;
     let mut pdf_file = File::create(output)?;
     pdf_file.write_all(pdf_bytes.as_slice())?;
 
