@@ -200,8 +200,18 @@ fn to_pdf(input: &Path, output: &Path) -> anyhow::Result<()> {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
     #[test]
     fn test_main() {
-        super::main().unwrap();
+        let tempdir = tempfile::tempdir().unwrap();
+
+        let generator = Generator {
+            input: "gliderlist.csv".into(),
+            assets: "assets".into(),
+            output: tempdir.path().into(),
+        };
+
+        generator.generate().unwrap();
     }
 }
