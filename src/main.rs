@@ -51,27 +51,27 @@ impl Generator {
 
         let mut output = String::new();
         output += indoc! {r#"
-        <!DOCTYPE html>
-        <html lang="de">
-        <head>
-            <meta charset="UTF-8">
-            <title>DMSt Indexliste 2023</title>
-            <link href="https://fonts.googleapis.com/css?family=Domine&display=swap" rel="stylesheet">
-            <link href="https://fonts.googleapis.com/css?family=Roboto:300,400&display=swap" rel="stylesheet">
-            <link href="styles.css" rel="stylesheet">
-        </head>
-        <body>
-        <h1 class="header">
-            <img src="logo.jpg" class="logo">
-            DMSt Indexliste 2023
-        </h1>
-        <table>
-          <thead><tr><td>
-            <div class="header-space">&nbsp;</div>
-          </td></tr></thead>
-          <tbody><tr><td>
-            <div class="content">
-    "#};
+            <!DOCTYPE html>
+            <html lang="de">
+            <head>
+                <meta charset="UTF-8">
+                <title>DMSt Indexliste 2023</title>
+                <link href="https://fonts.googleapis.com/css?family=Domine&display=swap" rel="stylesheet">
+                <link href="https://fonts.googleapis.com/css?family=Roboto:300,400&display=swap" rel="stylesheet">
+                <link href="styles.css" rel="stylesheet">
+            </head>
+            <body>
+            <h1 class="header">
+                <img src="logo.jpg" class="logo">
+                DMSt Indexliste 2023
+            </h1>
+            <table>
+              <thead><tr><td>
+                <div class="header-space">&nbsp;</div>
+              </td></tr></thead>
+              <tbody><tr><td>
+                <div class="content">
+        "#};
 
         let categories = vec![
             ("Open", "Offene Klasse"),
@@ -122,15 +122,15 @@ impl Generator {
         }
 
         output += indoc! {r#"
-            </div>
-          </td></tr></tbody>
-          <tfoot><tr><td>
-            <div class="footer-space">&nbsp;</div>
-          </td></tr></tfoot>
-        </table>
-        </body>
-        </html>
-    "#};
+                </div>
+              </td></tr></tbody>
+              <tfoot><tr><td>
+                <div class="footer-space">&nbsp;</div>
+              </td></tr></tfoot>
+            </table>
+            </body>
+            </html>
+        "#};
 
         fs::create_dir_all(&self.output)?;
         let file_path = self.output.join("handicaps.html");
