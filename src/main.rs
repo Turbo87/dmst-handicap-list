@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::fs::File;
 use std::io::Write;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use url::Url;
 
 #[derive(Ord, PartialOrd, Eq, PartialEq, Debug, Clone)]
@@ -142,11 +142,19 @@ fn main() -> anyhow::Result<()> {
     )?;
     fs::copy(assets_path.join("logo.jpg"), output_path.join("logo.jpg"))?;
 
-    let browser = Browser::default().unwrap();
-    let tab = browser.wait_for_initial_tab().unwrap();
-
     let file_path = fs::canonicalize(file_path)?;
-    let file_url = Url::from_file_path(&file_path).unwrap().to_string();
+    let pdf_path = output_path.join("handicaps.pdf");
+    to_pdf(&file_path, &pdf_path)?;
+
+    Ok(())
+}
+
+fn to_pdf(input: &Path, output: &Path) -> anyhow::Result<()> {
+    let file_url = Url::from_file_path(&input).unwrap().to_string();
+
+    let browser = Browser::default().unwrap();
+
+    let tab = browser.wait_for_initial_tab().unwrap();
     tab.navigate_to(&file_url).unwrap();
     tab.wait_until_navigated().unwrap();
 
@@ -168,8 +176,7 @@ fn main() -> anyhow::Result<()> {
         prefer_css_page_size: Some(true),
     };
     let pdf_bytes = tab.print_to_pdf(Some(options)).unwrap();
-    let pdf_path = output_path.join("handicaps.pdf");
-    let mut pdf_file = File::create(&pdf_path)?;
+    let mut pdf_file = File::create(&output)?;
     pdf_file.write_all(pdf_bytes.as_slice())?;
 
     Ok(())
