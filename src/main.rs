@@ -55,7 +55,7 @@ impl Generator {
             <html lang="de">
             <head>
                 <meta charset="UTF-8">
-                <title>DMSt Indexliste 2023</title>
+                <title>DAeC Indexliste: DMSt 2023</title>
                 <link href="https://fonts.googleapis.com/css?family=Domine&display=swap" rel="stylesheet">
                 <link href="https://fonts.googleapis.com/css?family=Roboto:300,400&display=swap" rel="stylesheet">
                 <link href="styles.css" rel="stylesheet">
@@ -63,7 +63,7 @@ impl Generator {
             <body>
             <h1 class="header">
                 <img src="logo.jpg" class="logo">
-                DMSt Indexliste 2023
+                DAeC Indexliste: DMSt 2023
             </h1>
             <table>
               <thead><tr><td>
