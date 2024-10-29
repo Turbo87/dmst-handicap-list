@@ -15,88 +15,85 @@ struct PlaneType {
     highlight: bool,
 }
 
-struct Generator {
+#[derive(Debug, clap::Parser)]
+struct Options {
+    #[arg(long, default_value = "gliderlist.csv")]
     input: PathBuf,
+    #[arg(long, default_value = "assets")]
     assets: PathBuf,
+    #[arg(long, default_value = "output")]
     output: PathBuf,
 }
 
-impl Generator {
-    fn generate(&self) -> anyhow::Result<()> {
-        let file = File::open(&self.input)?;
+fn generate(opts: &Options) -> anyhow::Result<()> {
+    let file = File::open(&opts.input)?;
 
-        let mut handicaps: HashMap<String, HashMap<u8, Vec<PlaneType>>> = HashMap::new();
+    let mut handicaps: HashMap<String, HashMap<u8, Vec<PlaneType>>> = HashMap::new();
 
-        let mut rdr = csv::Reader::from_reader(file);
-        for result in rdr.records() {
-            let record = result?;
-            let id = record
-                .get(0)
-                .unwrap()
-                .parse::<u32>()
-                .context("Failed to parse id")?;
-            let name = record.get(2).unwrap().to_string();
-            let old_handicap = record.get(16).unwrap().parse::<u8>()?;
-            let handicap = record.get(17).unwrap().parse::<u8>()?;
-            let class = record.get(4).unwrap().to_string();
+    let mut rdr = csv::Reader::from_reader(file);
+    for result in rdr.records() {
+        let record = result?;
+        let id = record
+            .get(0)
+            .unwrap()
+            .parse::<u32>()
+            .context("Failed to parse id")?;
+        let name = record.get(2).unwrap().to_string();
+        let old_handicap = record.get(16).unwrap().parse::<u8>()?;
+        let handicap = record.get(17).unwrap().parse::<u8>()?;
+        let class = record.get(4).unwrap().to_string();
 
-            let highlight = id > 593 || handicap != old_handicap;
+        let highlight = id > 593 || handicap != old_handicap;
 
-            let plane_type = PlaneType { name, highlight };
+        let plane_type = PlaneType { name, highlight };
 
-            let class_handicaps = handicaps.entry(class).or_default();
-            let glider_list = class_handicaps.entry(handicap).or_default();
-            glider_list.push(plane_type);
-        }
-
-        let categories = vec![
-            ("Open", "Offene Klasse"),
-            ("18", "18m Klasse"),
-            ("15", "15m Klasse"),
-            ("Standard", "Standardklasse"),
-            ("Club", "Clubklasse"),
-            ("Double", "Doppelsitzer"),
-        ];
-
-        let env = Environment::new();
-        let template = fs::read_to_string(self.assets.join("dmst.jinja"))?;
-        let template = env.template_from_str(&template)?;
-        let output = template.render(context! { categories, handicaps })?;
-
-        fs::create_dir_all(&self.output)?;
-        let file_path = self.output.join("handicaps.html");
-        let mut file = File::create(&file_path)?;
-        file.write_all(output.as_bytes())?;
-
-        fs::copy(
-            self.assets.join("normalize.css"),
-            self.output.join("normalize.css"),
-        )?;
-        fs::copy(
-            self.assets.join("styles.css"),
-            self.output.join("styles.css"),
-        )?;
-        fs::copy(
-            self.assets.join("dmst-logo.svg"),
-            self.output.join("dmst-logo.svg"),
-        )?;
-
-        let file_path = fs::canonicalize(file_path)?;
-        let pdf_path = self.output.join("handicaps.pdf");
-        to_pdf(&file_path, &pdf_path)?;
-
-        Ok(())
+        let class_handicaps = handicaps.entry(class).or_default();
+        let glider_list = class_handicaps.entry(handicap).or_default();
+        glider_list.push(plane_type);
     }
+
+    let categories = vec![
+        ("Open", "Offene Klasse"),
+        ("18", "18m Klasse"),
+        ("15", "15m Klasse"),
+        ("Standard", "Standardklasse"),
+        ("Club", "Clubklasse"),
+        ("Double", "Doppelsitzer"),
+    ];
+
+    let env = Environment::new();
+    let template = fs::read_to_string(opts.assets.join("dmst.jinja"))?;
+    let template = env.template_from_str(&template)?;
+    let output = template.render(context! { categories, handicaps })?;
+
+    fs::create_dir_all(&opts.output)?;
+    let file_path = opts.output.join("handicaps.html");
+    let mut file = File::create(&file_path)?;
+    file.write_all(output.as_bytes())?;
+
+    fs::copy(
+        opts.assets.join("normalize.css"),
+        opts.output.join("normalize.css"),
+    )?;
+    fs::copy(
+        opts.assets.join("styles.css"),
+        opts.output.join("styles.css"),
+    )?;
+    fs::copy(
+        opts.assets.join("dmst-logo.svg"),
+        opts.output.join("dmst-logo.svg"),
+    )?;
+
+    let file_path = fs::canonicalize(file_path)?;
+    let pdf_path = opts.output.join("handicaps.pdf");
+    to_pdf(&file_path, &pdf_path)?;
+
+    Ok(())
 }
 
 fn main() -> anyhow::Result<()> {
-    let generator = Generator {
-        input: "gliderlist.csv".into(),
-        assets: "assets".into(),
-        output: "output".into(),
-    };
-
-    generator.generate()
+    let opts: Options = clap::Parser::parse();
+    generate(&opts)
 }
 
 fn to_pdf(input: &Path, output: &Path) -> anyhow::Result<()> {
@@ -131,13 +128,13 @@ mod tests {
     fn test_main() {
         let tempdir = tempfile::tempdir().unwrap();
 
-        let generator = Generator {
+        let opts = Options {
             input: "gliderlist.csv".into(),
             assets: "assets".into(),
             output: tempdir.path().into(),
         };
 
-        generator.generate().unwrap();
+        generate(&opts).unwrap();
 
         let html = fs::read_to_string(tempdir.path().join("handicaps.html")).unwrap();
         assert_snapshot!(html);
