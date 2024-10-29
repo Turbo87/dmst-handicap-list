@@ -166,7 +166,7 @@ fn main() -> anyhow::Result<()> {
 }
 
 fn to_pdf(input: &Path, output: &Path) -> anyhow::Result<()> {
-    let file_url = Url::from_file_path(&input).unwrap().to_string();
+    let file_url = Url::from_file_path(input).unwrap().to_string();
 
     let browser = Browser::default().unwrap();
 
@@ -192,7 +192,7 @@ fn to_pdf(input: &Path, output: &Path) -> anyhow::Result<()> {
         prefer_css_page_size: Some(true),
     };
     let pdf_bytes = tab.print_to_pdf(Some(options)).unwrap();
-    let mut pdf_file = File::create(&output)?;
+    let mut pdf_file = File::create(output)?;
     pdf_file.write_all(pdf_bytes.as_slice())?;
 
     Ok(())
