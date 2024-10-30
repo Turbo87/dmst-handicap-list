@@ -38,6 +38,36 @@ impl Record {
     }
 }
 
+#[derive(Debug, serde::Serialize)]
+struct CompetitionClass {
+    title: String,
+    cutoff: f32,
+    records: Vec<Record>,
+}
+
+impl CompetitionClass {
+    fn from(
+        title: impl Into<String>,
+        reference: f32,
+        cutoff: f32,
+        all_records: &[Record],
+        filter: impl Fn(&Record) -> bool,
+    ) -> CompetitionClass {
+        let title = title.into();
+        let records = all_records
+            .iter()
+            .filter(|r| filter(*r) && r.handicap >= cutoff)
+            .map(|r| r.with_handicap(r.handicap / reference))
+            .collect::<Vec<_>>();
+
+        CompetitionClass {
+            title,
+            cutoff,
+            records,
+        }
+    }
+}
+
 pub fn generate_competition(opts: &Options) -> anyhow::Result<()> {
     let file = File::open("competition.csv")?;
 
@@ -45,23 +75,9 @@ pub fn generate_competition(opts: &Options) -> anyhow::Result<()> {
         .deserialize()
         .collect::<Result<Vec<Record>, _>>()?;
 
-    const REFERENCE_15M: f32 = 114.;
-    const CUTOFF_15M: f32 = 105.;
-
-    let m15 = handicaps
-        .iter()
-        .filter(|r| r.is_15m && r.handicap > CUTOFF_15M)
-        .map(|r| r.with_handicap(r.handicap / REFERENCE_15M))
-        .collect::<Vec<_>>();
-
-    const REFERENCE_STD: f32 = 110.;
-    const CUTOFF_STD: f32 = 101.;
-
-    let standard = handicaps
-        .iter()
-        .filter(|r| r.is_standard && r.handicap > CUTOFF_STD)
-        .map(|r| r.with_handicap(r.handicap / REFERENCE_STD))
-        .collect::<Vec<_>>();
+    let m15 = CompetitionClass::from("15m Klasse", 114., 106., &handicaps, |r| r.is_15m);
+    let standard =
+        CompetitionClass::from("Standardklasse", 110., 102., &handicaps, |r| r.is_standard);
 
     let mut env = Environment::new();
     env.add_filter("format_handicap", format_handicap);

@@ -24,10 +24,10 @@
   <tr>
     <td>
       <div class="content">
-        {% macro section(title, records) %}
-        <h2>{{ title }}</h2>
+        {% macro section(c) %}
+        <h2>{{ c.title }}</h2>
         <table>
-          {%- for handicap, gliders in records | groupby("handicap") | sort(reverse=true) %}
+          {%- for handicap, gliders in c.records | groupby("handicap") | sort(reverse=true) %}
             <tr>
               <td>
                 {%- for glider in gliders | sort(attribute="model") %}
@@ -38,10 +38,15 @@
             </tr>
           {%- endfor %}
         </table>
+        <p class="comment">
+          Flugzeuge, die der Klassendefinition entsprechen und in der klassenübergreifenden Liste
+          einen Index von <b>{{ c.cutoff | int }}</b> oder weniger haben, erhalten einen Index von
+          <b>{{ c.records | map(attribute="handicap") | min | format_handicap }}</b>.
+        </p>
         {% endmacro %}
 
-        {{ section("15m Klasse", m15) }}
-        {{ section("Standardklasse", standard) }}
+        {{ section(m15) }}
+        {{ section(standard) }}
 
         <h2>Klassenübergreifend</h2>
         <table>
