@@ -16,4 +16,4 @@ tempfile = "=3.13.0"
 url = "=2.5.2"
 
 [dev-dependencies]
-insta = "=1.41.0"
+insta = "=1.41.1"
